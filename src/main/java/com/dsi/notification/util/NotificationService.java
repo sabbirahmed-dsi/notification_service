@@ -12,7 +12,7 @@ public class NotificationService extends ResourceConfig {
     public NotificationService() {
         packages("com.dsi.notification");
         register(ResponseCORSFilter.class);
-        //register(CheckAuthorizationFilter.class);
+        register(CheckAuthorizationFilter.class);
 
         SessionUtil.getSession();
     }

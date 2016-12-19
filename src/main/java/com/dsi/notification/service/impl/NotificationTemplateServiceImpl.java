@@ -51,6 +51,7 @@ public class NotificationTemplateServiceImpl extends CommonService implements No
 
             NotificationTemplate existNotificationTemp = templateDao.getNotificationTemplateById
                     (String.valueOf(notificationTemplate.getNotificationTemplateId()));
+            
             existNotificationTemp.setActive(notificationTemplate.isActive());
             templateDao.updateNotificationTemplate(existNotificationTemp);
 
@@ -71,8 +72,8 @@ public class NotificationTemplateServiceImpl extends CommonService implements No
     }
 
     @Override
-    public List<NotificationTemplate> getAllNotificationTemplate(String typeID, String typeName,
-                                                                 String systemID, String templateID, String templateName) throws CustomException {
+    public List<NotificationTemplate> getAllNotificationTemplate(String typeID, String typeName, String systemID,
+                                                                 String templateID, String templateName) throws CustomException {
         Session session = getSession();
         templateDao.setSession(session);
 

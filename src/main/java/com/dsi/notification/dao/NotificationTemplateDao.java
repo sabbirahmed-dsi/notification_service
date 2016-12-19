@@ -15,7 +15,7 @@ public interface NotificationTemplateDao {
     void saveNotificationTemplate(NotificationTemplate notificationTemplate) throws CustomException;
     void updateNotificationTemplate(NotificationTemplate notificationTemplate) throws CustomException;
     void deleteNotificationTemplate(String notificationTemplateID) throws CustomException;
-    List<NotificationTemplate> getAllNotificationTemplate(String typeID, String typeName,
-                                                          String systemID, String templateID, String templateName);
+    List<NotificationTemplate> getAllNotificationTemplate(String typeID, String typeName, String systemID,
+                                                          String templateID, String templateName);
     NotificationTemplate getNotificationTemplateById(String templateId);
 }

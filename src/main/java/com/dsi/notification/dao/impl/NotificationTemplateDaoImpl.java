@@ -123,10 +123,10 @@ public class NotificationTemplateDaoImpl implements NotificationTemplateDao {
 
         if(!Utility.isNullOrEmpty(templateName)){
             if(hasClause) {
-                queryBuilder.append(" AND nt.templateName =:templateName");
+                queryBuilder.append(" AND nt.templateName like :templateName");
 
             } else{
-                queryBuilder.append(" WHERE nt.templateName =:templateName");
+                queryBuilder.append(" WHERE nt.templateName like :templateName");
             }
             paramValue.put("templateName", "%" + templateName + "%");
 

@@ -23,10 +23,10 @@ public class NotificationTransformer {
     public NotificationDto getNotificationDtoFromProcess(NotificationProcess notificationProcess) throws CustomException {
         NotificationDto notificationDto = new NotificationDto();
         try{
-            BeanUtils.copyProperties(notificationDto, notificationProcess);
             BeanUtils.copyProperties(notificationDto, notificationProcess.getNotification());
             BeanUtils.copyProperties(notificationDto, notificationProcess.getNotification().getNotificationType());
             BeanUtils.copyProperties(notificationDto, notificationProcess.getNotification().getNotificationTemplate());
+            BeanUtils.copyProperties(notificationDto, notificationProcess);
 
         } catch (Exception e){
             ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
@@ -97,8 +97,8 @@ public class NotificationTransformer {
     public NotificationTemplateDto getNotificationTemplateDto(NotificationTemplate template) throws CustomException {
         NotificationTemplateDto templateDto = new NotificationTemplateDto();
         try{
-            BeanUtils.copyProperties(templateDto, template);
             BeanUtils.copyProperties(templateDto, template.getNotificationType());
+            BeanUtils.copyProperties(templateDto, template);
 
         } catch (Exception e){
             ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());

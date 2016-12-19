@@ -45,7 +45,6 @@ public class NotificationTemplateResource {
                                                 @QueryParam("systemId") String systemId) throws CustomException {
 
         logger.info("Read all notification template:: start");
-        logger.info("TypeId: " + typeId);
         return Response.ok().entity(TRANSFORMER.getAllNotificationTemplateDto(templateService.
                 getAllNotificationTemplate(typeId, typeName, systemId, templateId, templateName))).build();
     }
@@ -67,7 +66,7 @@ public class NotificationTemplateResource {
                 getAllNotificationTemplate(null, null, null, null, null))).build();
     }
 
-    @PATCH
+    @PUT
     @ApiOperation(value = "Update Notification Template", notes = "Update Notification Template", position = 3)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Update notification template success"),

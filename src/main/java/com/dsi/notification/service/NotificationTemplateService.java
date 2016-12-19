@@ -13,6 +13,6 @@ public interface NotificationTemplateService {
     void saveNotificationTemplate(NotificationTemplate notificationTemplate) throws CustomException;
     void updateNotificationTemplate(List<NotificationTemplate> notificationTemplates) throws CustomException;
     void deleteNotificationTemplate(String notificationTemplateID) throws CustomException;
-    List<NotificationTemplate> getAllNotificationTemplate(String typeID, String typeName,
-                                                          String systemID, String templateID, String templateName) throws CustomException;
+    List<NotificationTemplate> getAllNotificationTemplate(String typeID, String typeName, String systemID,
+                                                          String templateID, String templateName) throws CustomException;
 }
