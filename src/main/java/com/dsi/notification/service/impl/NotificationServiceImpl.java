@@ -5,10 +5,7 @@ import com.dsi.notification.dao.impl.NotificationDaoImpl;
 import com.dsi.notification.exception.CustomException;
 import com.dsi.notification.exception.ErrorContext;
 import com.dsi.notification.exception.ErrorMessage;
-import com.dsi.notification.model.Notification;
-import com.dsi.notification.model.NotificationProcess;
-import com.dsi.notification.model.NotificationStatus;
-import com.dsi.notification.model.NotificationType;
+import com.dsi.notification.model.*;
 import com.dsi.notification.service.NotificationService;
 import com.dsi.notification.util.Constants;
 import org.apache.log4j.Logger;
@@ -32,17 +29,24 @@ public class NotificationServiceImpl extends CommonService implements Notificati
         Session session = getSession();
         notificationDao.setSession(session);
 
-        notificationDao.saveNotification(notification);
-        logger.info("Save notification success");
+        if(notificationDao.getNotificationTemplateStatus(notification.getNotificationTemplate()
+                .getNotificationTemplateId())){
 
-        NotificationProcess process = new NotificationProcess();
-        process.setNotification(notification);
-        process.setRetryCount(0);
-        process.setStatus(NotificationStatus.PROCESS.getValue());
-        process.setVersion(1);
-        notificationDao.saveNotificationProcess(process);
+            notificationDao.saveNotification(notification);
+            logger.info("Save notification success");
 
-        logger.info("Save notification process success");
+            NotificationProcess process = new NotificationProcess();
+            process.setNotification(notification);
+            process.setRetryCount(0);
+            process.setStatus(NotificationStatus.PROCESS.getValue());
+            process.setVersion(1);
+            notificationDao.saveNotificationProcess(process);
+
+            logger.info("Save notification process success");
+
+        } else {
+            logger.info("Notification doesn't save, because template is in-active.");
+        }
 
         close(session);
     }

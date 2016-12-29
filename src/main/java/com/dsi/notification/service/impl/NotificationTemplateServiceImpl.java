@@ -51,7 +51,7 @@ public class NotificationTemplateServiceImpl extends CommonService implements No
 
             NotificationTemplate existNotificationTemp = templateDao.getNotificationTemplateById
                     (String.valueOf(notificationTemplate.getNotificationTemplateId()));
-            
+
             existNotificationTemp.setActive(notificationTemplate.isActive());
             templateDao.updateNotificationTemplate(existNotificationTemp);
 

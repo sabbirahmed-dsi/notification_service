@@ -120,6 +120,14 @@ public class NotificationDaoImpl implements NotificationDao {
     }
 
     @Override
+    public boolean getNotificationTemplateStatus(Long templateId) {
+        Query query = session.createQuery("SELECT nt.isActive FROM NotificationTemplate nt WHERE nt.notificationTemplateId =:templateId");
+        query.setParameter("templateId", templateId);
+
+        return (boolean) query.uniqueResult();
+    }
+
+    @Override
     public List<Notification> getAllNotification(String typeID, String typeName, String templateID,
                                                  String systemID, String notificationID) {
 

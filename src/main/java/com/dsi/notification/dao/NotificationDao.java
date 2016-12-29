@@ -26,5 +26,6 @@ public interface NotificationDao {
     List<NotificationProcess> getAllNotificationProcess(String typeId, String typeName, String templateId,
                                                         String systemId, String notificationId);
 
+    boolean getNotificationTemplateStatus(Long templateId);
     List<NotificationType> getAllNotificationType();
 }
