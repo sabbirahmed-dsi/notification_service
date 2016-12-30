@@ -17,6 +17,7 @@ import org.codehaus.jettison.json.JSONObject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * Created by sabbir on 10/17/16.
@@ -55,18 +56,18 @@ public class NotificationResource {
 
     @POST
     @Path("/notification")
-    @ApiOperation(value = "Create Notification", notes = "Create Notification", position = 2)
+    @ApiOperation(value = "Create Notifications", notes = "Create Notifications", position = 2)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Create notification success"),
-            @ApiResponse(code = 500, message = "Create notification failed, unauthorized.")
+            @ApiResponse(code = 200, message = "Create notifications success"),
+            @ApiResponse(code = 500, message = "Create notifications failed, unauthorized.")
     })
-    public Response createNotification(@ApiParam(value = "Notification", required = true)
-                                                   NotificationDto notificationDto) throws CustomException, JSONException {
+    public Response createNotifications(@ApiParam(value = "Notification List", required = true)
+                                               List<NotificationDto> notificationDtoList) throws CustomException, JSONException {
 
         logger.info("Notification create:: start");
-        Notification notification = TRANSFORMER.getNotification(notificationDto);
+        List<Notification> notificationList = TRANSFORMER.getAllNotification(notificationDtoList);
 
-        notificationService.saveNotification(notification);
+        notificationService.saveNotification(notificationList);
 
         return Response.ok().entity(new JSONObject().put(Constants.MESSAGE, "Success").toString()).build();
     }

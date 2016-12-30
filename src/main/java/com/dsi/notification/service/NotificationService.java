@@ -4,7 +4,6 @@ import com.dsi.notification.exception.CustomException;
 import com.dsi.notification.model.Notification;
 import com.dsi.notification.model.NotificationProcess;
 import com.dsi.notification.model.NotificationType;
-import scala.util.parsing.combinator.testing.Str;
 
 import java.util.List;
 
@@ -13,7 +12,7 @@ import java.util.List;
  */
 public interface NotificationService {
 
-    void saveNotification(Notification notification) throws CustomException;
+    void saveNotification(List<Notification> notificationList) throws CustomException;
     void updateNotification(Notification notification) throws CustomException;
     List<Notification> getAllNotification(String typeID, String typeName, String templateID,
                                           String systemID, String notificationID) throws CustomException;

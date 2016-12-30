@@ -67,6 +67,14 @@ public class NotificationTransformer {
         return notification;
     }
 
+    public List<Notification> getAllNotification(List<NotificationDto> notificationDtoList) throws CustomException {
+        List<Notification> notifications = new ArrayList<>();
+        for(NotificationDto notificationDto : notificationDtoList){
+            notifications.add(getNotification(notificationDto));
+        }
+        return notifications;
+    }
+
     public NotificationTemplate getNotificationTemplate(NotificationTemplateDto templateDto) throws CustomException {
         NotificationTemplate template = new NotificationTemplate();
         try{

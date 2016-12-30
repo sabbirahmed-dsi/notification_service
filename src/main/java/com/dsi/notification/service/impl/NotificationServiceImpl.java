@@ -23,36 +23,41 @@ public class NotificationServiceImpl extends CommonService implements Notificati
     private static final NotificationDao notificationDao = new NotificationDaoImpl();
 
     @Override
-    public void saveNotification(Notification notification) throws CustomException {
-        validateInputForCreation(notification);
+    public void saveNotification(List<Notification> notificationList) throws CustomException {
 
         Session session = getSession();
         notificationDao.setSession(session);
 
-        if(notificationDao.getNotificationTemplateStatus(notification.getNotificationTemplate()
-                .getNotificationTemplateId())){
+        for(Notification notification : notificationList){
 
-            notificationDao.saveNotification(notification);
-            logger.info("Save notification success");
+            validateInputForCreation(notification, session);
 
-            NotificationProcess process = new NotificationProcess();
-            process.setNotification(notification);
-            process.setRetryCount(0);
-            process.setStatus(NotificationStatus.PROCESS.getValue());
-            process.setVersion(1);
-            notificationDao.saveNotificationProcess(process);
+            if(notificationDao.getNotificationTemplateStatus(notification.getNotificationTemplate()
+                    .getNotificationTemplateId())){
 
-            logger.info("Save notification process success");
+                notificationDao.saveNotification(notification);
+                logger.info("Save notification success");
 
-        } else {
-            logger.info("Notification doesn't save, because template is in-active.");
+                NotificationProcess process = new NotificationProcess();
+                process.setNotification(notification);
+                process.setRetryCount(0);
+                process.setStatus(NotificationStatus.PROCESS.getValue());
+                process.setVersion(1);
+                notificationDao.saveNotificationProcess(process);
+
+                logger.info("Save notification process success");
+
+            } else {
+                logger.info("Notification doesn't save, because template is in-active.");
+            }
         }
 
         close(session);
     }
 
-    private void validateInputForCreation(Notification notification) throws CustomException {
+    private void validateInputForCreation(Notification notification, Session session) throws CustomException {
         if(notification.getNotificationTemplate().getNotificationTemplateId() == null){
+            close(session);
             ErrorContext errorContext = new ErrorContext(null, "Notification", "Notification template id not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.NOTIFICATION_SERVICE_0001_DESCRIPTION,
                     Constants.NOTIFICATION_SERVICE_0001_DESCRIPTION, errorContext);
@@ -60,6 +65,7 @@ public class NotificationServiceImpl extends CommonService implements Notificati
         }
 
         if(notification.getNotificationType().getNotificationTypeId() == null){
+            close(session);
             ErrorContext errorContext = new ErrorContext(null, "Notification", "Notification type id not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.NOTIFICATION_SERVICE_0001_DESCRIPTION,
                     Constants.NOTIFICATION_SERVICE_0001_DESCRIPTION, errorContext);
