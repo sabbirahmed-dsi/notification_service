@@ -33,10 +33,10 @@ public class EmailNotificationHandler implements NotificationHandler {
         String success;
         try{
             JSONObject contentObj = new JSONObject(notification.getContentJson());
-            String recipientArray = contentObj.getString("recipient");
-            String body = contentObj.getString("body");
+            JSONArray recipientArray = contentObj.getJSONArray("Recipient");
 
-            String template = notification.getNotificationTemplate().getTemplate();
+            String subject = notification.getNotificationTemplate().getTemplateName();
+            String body = notification.getNotificationTemplate().getTemplate();
             String username = emailConfig.getUsername();
             String password = emailConfig.getPassword();
             String host = emailConfig.getHost();
@@ -52,14 +52,15 @@ public class EmailNotificationHandler implements NotificationHandler {
 
             message.setFrom(new InternetAddress(username));
 
-            JSONArray recipients = new JSONArray(recipientArray);
-            if(recipients.length() > 0) {
-                for (int i = 0; i < recipients.length(); i++) {
-                    message.addRecipient(Message.RecipientType.TO, new InternetAddress(recipients.getString(i)));
+            if(recipientArray.length() > 0) {
+                for (int i = 0; i < recipientArray.length(); i++) {
+                    message.addRecipient(Message.RecipientType.TO, new InternetAddress(recipientArray.getString(i)));
                 }
             }
 
-            message.setSubject(template);
+            //TODO template construct with content
+
+            message.setSubject(subject);
             message.setText(body);
 
             Transport transport = session.getTransport(emailConfig.getTransport());

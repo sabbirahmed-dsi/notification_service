@@ -27,72 +27,90 @@ public class NotificationCron {
     private static final NotificationConfigService configService = new NotificationConfigServiceImpl();
     private static final NotificationFactory notificationFactory = new NotificationFactoryImpl();
 
-    private static NotificationHandler notificationHandler;
     private static EmailConfig emailConfig;
     private static SMSConfig smsConfig;
 
-    public static void main(String[] args) throws CustomException {
+    public static void main(String[] args) {
 
-        logger.info("Read notification type");
-        List<NotificationType> notificationTypes = notificationService.getAllNotificationType();
+        boolean once = true;
+        boolean flag = true;
 
-        if(!Utility.isNullOrEmpty(notificationTypes)){
-            logger.info("Notification type list: " + notificationTypes.size());
+        while(flag) {
 
-            for(NotificationType type : notificationTypes){
-                logger.info("Notification type name: " + type.getName());
+            try {
+                if(once) {
 
-                NotificationConfig notificationConfig = configService.getNotificationConfigByType(type.getNotificationTypeId());
-                if(notificationConfig != null){
-                    logger.info("Notification config: " + notificationConfig.getConfigJson());
+                    logger.info("Read notification type");
+                    List<NotificationType> notificationTypes = notificationService.getAllNotificationType();
 
-                    if(type.getName().equals(Constants.EMAIL_TYPE)){
-                        configureEmail(notificationConfig.getConfigJson());
+                    if (!Utility.isNullOrEmpty(notificationTypes)) {
+                        logger.info("Notification type list: " + notificationTypes.size());
 
-                    } else if(type.getName().equals(Constants.SMS_TYPE)){
-                        //TODO initialize sms service.
+                        for (NotificationType type : notificationTypes) {
+                            logger.info("Notification type name: " + type.getName());
 
+                            NotificationConfig notificationConfig = configService.getNotificationConfigByType(type.getNotificationTypeId());
+                            if (notificationConfig != null) {
+                                logger.info("Notification config: " + notificationConfig.getConfigJson());
+
+                                if (type.getName().equals(Constants.EMAIL_TYPE)) {
+                                    configureEmail(notificationConfig.getConfigJson());
+
+                                } else if (type.getName().equals(Constants.SMS_TYPE)) {
+                                    //TODO initialize sms service.
+
+                                }
+                            }
+                        }
                     }
+                    once = false;
                 }
-            }
-        }
 
-        logger.info("Read latest 10 notification that are not sending yet.");
-        List<NotificationProcess> processList = notificationService.getAllNotificationProcessByStatus();
+                logger.info("Read latest 10 notification that are not sending yet.");
+                List<NotificationProcess> processList = notificationService.getAllNotificationProcessByStatus();
 
-        if(!Utility.isNullOrEmpty(processList)){
-            logger.info("Notification list size: " + processList.size());
+                if (!Utility.isNullOrEmpty(processList)) {
+                    logger.info("Notification list size: " + processList.size());
 
-            for(NotificationProcess process : processList){
-                if(process.getRetryCount() < process.getNotification().getMaxRetryCount()){
-                    process.setRetryCount(process.getRetryCount() + 1);
+                    for (NotificationProcess process : processList) {
+                        if (process.getRetryCount() < process.getNotification().getMaxRetryCount()) {
+                            process.setRetryCount(process.getRetryCount() + 1);
 
-                    String notificationHandlerClassName = process.getNotification().getNotificationType().getLoader();
-                    logger.info("Notification handler class name: " + notificationHandlerClassName);
+                            String notificationHandlerClassName = process.getNotification().getNotificationType().getLoader();
+                            logger.info("Notification handler class name: " + notificationHandlerClassName);
 
-                    notificationHandler = (NotificationHandler) notificationFactory.getInstance(notificationHandlerClassName);
+                            NotificationHandler notificationHandler = (NotificationHandler) notificationFactory.
+                                    getInstance(notificationHandlerClassName);
 
-                    if(process.getNotification().getNotificationType().getName().equals(Constants.EMAIL_TYPE)){
+                            if (process.getNotification().getNotificationType().getName().equals(Constants.EMAIL_TYPE)) {
 
-                        notificationHandler.setEmailConfigure(emailConfig);
-                        String result = notificationHandler.constructBody(process.getNotification());
+                                notificationHandler.setEmailConfigure(emailConfig);
+                                String result = notificationHandler.constructBody(process.getNotification());
 
-                        logger.info("Email result: " + result);
-                        if(result != null){
-                            process.setStatus(NotificationStatus.SUCCESS.getValue());
+                                logger.info("Email result: " + result);
+                                if (result != null) {
+                                    process.setStatus(NotificationStatus.SUCCESS.getValue());
+                                }
+
+                            } else if (process.getNotification().getNotificationType().getName().equals(Constants.SMS_TYPE)) {
+                                notificationHandler.setSMSConfigure(smsConfig);
+
+                            }
+
+                        } else {
+                            logger.info("Retry limit max over.");
+                            process.setStatus(NotificationStatus.FAILED.getValue());
                         }
 
-                    } else if(process.getNotification().getNotificationType().getName().equals(Constants.SMS_TYPE)){
-                        notificationHandler.setSMSConfigure(smsConfig);
-
+                        notificationService.updateNotificationProcess(process);
                     }
-
                 } else {
-                    logger.info("Retry limit max over.");
-                    process.setStatus(NotificationStatus.FAILED.getValue());
+                    Thread.sleep(10000);
                 }
 
-                notificationService.updateNotificationProcess(process);
+            } catch (CustomException | InterruptedException ce){
+                ce.printStackTrace();
+                flag = false;
             }
         }
     }
