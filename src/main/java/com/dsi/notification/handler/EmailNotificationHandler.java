@@ -7,6 +7,7 @@ import com.dsi.notification.service.NotificationHandler;
 import com.dsi.notification.util.Constants;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import javax.mail.Message;
@@ -33,10 +34,13 @@ public class EmailNotificationHandler implements NotificationHandler {
         String success;
         try{
             JSONObject contentObj = new JSONObject(notification.getContentJson());
-            JSONArray recipientArray = contentObj.getJSONArray("Recipient");
+            JSONArray recipientArray = contentObj.getJSONArray("Recipients");
+            logger.info("Recipients email list:: " + recipientArray.toString());
 
-            String subject = notification.getNotificationTemplate().getTemplateName();
-            String body = notification.getNotificationTemplate().getTemplate();
+            JSONObject templateObj = new JSONObject(notification.getNotificationTemplate().getTemplate());
+            String subject = templateObj.getString("subject");
+            String body = templateObj.getString("body");
+
             String username = emailConfig.getUsername();
             String password = emailConfig.getPassword();
             String host = emailConfig.getHost();
@@ -58,10 +62,8 @@ public class EmailNotificationHandler implements NotificationHandler {
                 }
             }
 
-            //TODO template construct with content
-
             message.setSubject(subject);
-            message.setText(body);
+            message.setText(constructBodyWithContent(body, contentObj));
 
             Transport transport = session.getTransport(emailConfig.getTransport());
             transport.connect(host, username, password);
@@ -75,6 +77,29 @@ public class EmailNotificationHandler implements NotificationHandler {
             success = null;
         }
         return success;
+    }
+
+    private String constructBodyWithContent(String body, JSONObject contentObj) throws JSONException {
+        int contentKeyIndex, bodyIndex;
+        String newBody = "";
+        for(bodyIndex = 0; bodyIndex < body.length(); bodyIndex++){
+
+            if(body.charAt(bodyIndex) == '{'){
+                contentKeyIndex = bodyIndex + 1;
+                String contentKey = "";
+                while(body.charAt(contentKeyIndex) != '}'){
+                    contentKey += body.charAt(contentKeyIndex);
+                    contentKeyIndex++;
+                }
+                bodyIndex = contentKeyIndex;
+
+                newBody += contentObj.getString(contentKey);
+
+            } else {
+                newBody += body.charAt(bodyIndex);
+            }
+        }
+        return newBody;
     }
 
     @Override
