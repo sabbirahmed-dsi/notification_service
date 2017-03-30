@@ -54,7 +54,7 @@ public class EmailNotificationHandler implements NotificationHandler {
             Session session = Session.getDefaultInstance(emailProp, null);
             MimeMessage message = new MimeMessage(session);
 
-            message.setFrom(new InternetAddress(username));
+            message.setFrom(new InternetAddress(username, "DEM System"));
 
             if(recipientArray.length() > 0) {
                 for (int i = 0; i < recipientArray.length(); i++) {
@@ -62,8 +62,8 @@ public class EmailNotificationHandler implements NotificationHandler {
                 }
             }
 
-            message.setSubject(subject);
-            message.setText(constructBodyWithContent(body, contentObj));
+            message.setSubject(constructSubjectOrBodyWithContent(subject, contentObj));
+            message.setText(constructSubjectOrBodyWithContent(body, contentObj), "UTF-8", "html");
 
             Transport transport = session.getTransport(emailConfig.getTransport());
             transport.connect(host, username, password);
@@ -79,27 +79,32 @@ public class EmailNotificationHandler implements NotificationHandler {
         return success;
     }
 
-    private String constructBodyWithContent(String body, JSONObject contentObj) throws JSONException {
+    private String constructSubjectOrBodyWithContent(String body, JSONObject contentObj) throws JSONException {
         int contentKeyIndex, bodyIndex;
         String newBody = "";
-        for(bodyIndex = 0; bodyIndex < body.length(); bodyIndex++){
 
-            if(body.charAt(bodyIndex) == '{'){
-                contentKeyIndex = bodyIndex + 1;
-                String contentKey = "";
-                while(body.charAt(contentKeyIndex) != '}'){
-                    contentKey += body.charAt(contentKeyIndex);
-                    contentKeyIndex++;
+        if(body.contains("{")) {
+            for (bodyIndex = 0; bodyIndex < body.length(); bodyIndex++) {
+
+                if (body.charAt(bodyIndex) == '{') {
+                    contentKeyIndex = bodyIndex + 1;
+                    String contentKey = "";
+                    while (body.charAt(contentKeyIndex) != '}') {
+                        contentKey += body.charAt(contentKeyIndex);
+                        contentKeyIndex++;
+                    }
+                    bodyIndex = contentKeyIndex;
+
+                    newBody += contentObj.getString(contentKey);
+
+                } else {
+                    newBody += body.charAt(bodyIndex);
                 }
-                bodyIndex = contentKeyIndex;
-
-                newBody += contentObj.getString(contentKey);
-
-            } else {
-                newBody += body.charAt(bodyIndex);
             }
+            return newBody;
         }
-        return newBody;
+
+        return body;
     }
 
     @Override
