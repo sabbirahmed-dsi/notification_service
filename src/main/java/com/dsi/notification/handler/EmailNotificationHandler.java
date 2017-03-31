@@ -95,7 +95,12 @@ public class EmailNotificationHandler implements NotificationHandler {
                     }
                     bodyIndex = contentKeyIndex;
 
-                    newBody += contentObj.getString(contentKey);
+                    if(contentObj.has(contentKey)) {
+                        newBody += contentObj.getString(contentKey);
+
+                    } else {
+                        newBody += ".....";
+                    }
 
                 } else {
                     newBody += body.charAt(bodyIndex);
